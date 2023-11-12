@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleEnum {
+  OWNER
+  ADMIN
+  USER
+}
+
+enum LabelEnum {
+  FINANCE
+  TASK
+  ALL
+}
+
+model User {
+  id    Int    @id @default(autoincrement())
+  login String @unique
+  email String @unique
+  hash  String
+  salt  String
+
+  colaborators Collaborator[]
+}
+
+model Group {
+  id    Int     @id @default(autoincrement())
+  name  String
+  image String?
+
+  colaborators Collaborator[]
+  notes        Note[]
+  plans        Plan[]
+  finances     Finance[]
+  groupLabels   GroupLabel[]
+}
+
+model Collaborator {
+  id   Int      @id @default(autoincrement())
+  role RoleEnum
+
+  userId  Int
+  user    User  @relation(fields: [userId], references: [id])
+  groupId Int
+  group   Group @relation(fields: [groupId], references: [id])
+
+  @@unique([userId, groupId])
+}
+
+model Label {
+  id   Int       @id @default(autoincrement())
+  text String
+  type LabelEnum @default(ALL)
+
+  plans      Plan[]
+  finances   Finance[]
+  groupLabel GroupLabel?
+}
+
+model Note {
+  id          Int     @id @default(autoincrement())
+  message     String
+  isImportant Boolean @default(false)
+
+  groupId Int
+  group   Group @relation(fields: [groupId], references: [id])
+}
+
+model Plan {
+  id      Int       @id @default(autoincrement())
+  message String
+  dateTo  DateTime?
+
+  groupId Int
+  group   Group @relation(fields: [groupId], references: [id])
+
+  labelId Int?
+  label   Label? @relation(fields: [labelId], references: [id])
+}
+
+model Finance {
+  id       Int      @id @default(autoincrement())
+  isIncome Boolean  @default(false)
+  value    String
+  date     DateTime
+
+  groupId Int
+  group   Group @relation(fields: [groupId], references: [id])
+
+  labelId Int?
+  label   Label? @relation(fields: [labelId], references: [id])
+}
+
+model GroupLabel {
+  id Int @id @default(autoincrement())
+
+  labelId Int   @unique
+  label   Label @relation(fields: [labelId], references: [id])
+  groupId Int
+  group   Group @relation(fields: [groupId], references: [id])
+}
