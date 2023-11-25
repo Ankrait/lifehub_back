@@ -47,6 +47,18 @@ export class NotesController {
     return user.role;
   }
 
+  @Get('/:id')
+  @ApiOkResponse({ type: NoteDto })
+  async GetNoteById(
+    @SessionInfo() session: SessionDto,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const access = await this.checkUser(session.id, ['note', id]);
+    if (!access) throw new BadRequestException(errorMessages.NO_GROUP_ACCESS);
+
+    return this.notesService.getById(id);
+  }
+
   @Get()
   @ApiOkResponse({ type: Array<NoteDto> })
   async getNotesByGroup(
@@ -82,7 +94,7 @@ export class NotesController {
     const access = await this.checkUser(session.id, ['note', id]);
     if (!access) throw new BadRequestException(errorMessages.NO_GROUP_ACCESS);
     if (access === RoleEnum.USER)
-      throw new BadRequestException('Вы не имеете доступа');
+      throw new BadRequestException(errorMessages.NO_RULE);
 
     await this.notesService.delete(id);
   }

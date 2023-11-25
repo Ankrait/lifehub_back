@@ -14,8 +14,7 @@ import {
 import { PlansService } from './plans.service';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { CreatePlanDto, UpdatePlanDto } from './dto';
-import { GroupDto } from 'src/groups/dto';
+import { CreatePlanDto, PlanDto, UpdatePlanDto } from './dto';
 import { errorMessages } from 'src/common/errorMessages';
 import { CollaboratorsService } from 'src/collaborators/collaborators.service';
 import { SessionInfo } from 'src/auth/session.decorator';
@@ -48,7 +47,7 @@ export class PlansController {
   }
 
   @Get()
-  @ApiOkResponse({ type: Array<GroupDto> })
+  @ApiOkResponse({ type: Array<PlanDto> })
   async getPlansByGroup(
     @SessionInfo() session: SessionDto,
     @Query('groupId', ParseIntPipe) groupId: number,
@@ -61,7 +60,7 @@ export class PlansController {
 
   @Post()
   @ApiCreatedResponse({
-    type: GroupDto,
+    type: PlanDto,
   })
   async createPlan(
     @SessionInfo() session: SessionDto,
@@ -73,9 +72,23 @@ export class PlansController {
     return await this.plansService.create(body);
   }
 
+  @Get('/:id')
+  @ApiOkResponse({
+    type: PlanDto,
+  })
+  async GetPlanById(
+    @SessionInfo() session: SessionDto,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const access = await this.checkUser(session.id, ['plan', id]);
+    if (!access) throw new BadRequestException(errorMessages.NO_GROUP_ACCESS);
+
+    return await this.plansService.getById(id);
+  }
+
   @Patch('/:id')
   @ApiOkResponse({
-    type: GroupDto,
+    type: PlanDto,
   })
   async updatePlan(
     @SessionInfo() session: SessionDto,

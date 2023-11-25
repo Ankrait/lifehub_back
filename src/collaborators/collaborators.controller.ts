@@ -16,12 +16,22 @@ import {
 import { SessionInfo } from 'src/auth/session.decorator';
 import { SessionDto } from 'src/auth/dto';
 import { RoleEnum } from '@prisma/client';
+import { errorMessages } from 'src/common/errorMessages';
 
 @ApiTags('Collaborators')
 @Controller('collaborators')
 @UseGuards(AuthGuard)
 export class CollaboratorsController {
   constructor(private readonly collaboratorsService: CollaboratorsService) {}
+
+  private async checkUser(userId: number, groupId: number) {
+    const user = await this.collaboratorsService.get({
+      groupId,
+      userId,
+    });
+
+    return user ? user.role : false;
+  }
 
   @Post('/create_update')
   @ApiCreatedResponse({
@@ -31,12 +41,9 @@ export class CollaboratorsController {
     @SessionInfo() session: SessionDto,
     @Body() body: CreateCollaboratorDto,
   ) {
-    const creator = await this.collaboratorsService.get({
-      groupId: body.groupId,
-      userId: session.id,
-    });
-
-    if (!creator || creator.role === RoleEnum.USER)
+    const access = await this.checkUser(session.id, body.groupId);
+    if (!access) throw new BadRequestException(errorMessages.NO_GROUP_ACCESS);
+    if (access === RoleEnum.USER)
       throw new BadRequestException(
         'Вы не можете добавить участника в эту группу',
       );
@@ -50,12 +57,9 @@ export class CollaboratorsController {
     @SessionInfo() session: SessionDto,
     @Body() body: DeleteCollaboratorDto,
   ) {
-    const deletor = await this.collaboratorsService.get({
-      groupId: body.groupId,
-      userId: session.id,
-    });
-
-    if (!deletor || deletor.role !== RoleEnum.OWNER)
+    const access = await this.checkUser(session.id, body.groupId);
+    if (!access) throw new BadRequestException(errorMessages.NO_GROUP_ACCESS);
+    if (access !== RoleEnum.OWNER)
       throw new BadRequestException('Вы не можете удалить эту группу');
 
     return this.collaboratorsService.delete(body);

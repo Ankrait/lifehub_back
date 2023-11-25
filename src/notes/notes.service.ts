@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DbService } from 'src/db/db.service';
 import { CreateNoteDto, UpdateNoteDto } from './dto';
 
@@ -17,28 +17,17 @@ export class NotesService {
   }
 
   async create(dto: CreateNoteDto) {
-    try {
-      return await this.dbService.note.create({ data: dto });
-    } catch {
-      throw new BadRequestException('Группа не найдена');
-    }
+    return await this.dbService.note.create({ data: dto });
   }
 
   async update(id: number, dto: UpdateNoteDto) {
-    try {
-      return await this.dbService.note.update({
-        where: { id },
-        data: dto,
-      });
-    } catch {
-      throw new BadRequestException('Заметка не найдена');
-    }
+    return await this.dbService.note.update({
+      where: { id },
+      data: dto,
+    });
   }
 
   async delete(id: number) {
-    const deleted = await this.dbService.note.deleteMany({ where: { id } });
-
-    if (deleted.count === 0)
-      throw new BadRequestException('Заметка не найдена');
+    await this.dbService.note.delete({ where: { id } });
   }
 }

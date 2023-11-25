@@ -43,6 +43,20 @@ export class FinancesController {
     return user.role;
   }
 
+  @Get('/:id')
+  @ApiOkResponse({ type: FinanceDto })
+  async getFinanceById(
+    @SessionInfo() session: SessionDto,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const access = await this.checkUser(session.id, ['finance', id]);
+    if (!access) throw new BadRequestException(errorMessages.NO_GROUP_ACCESS);
+
+    const fin = await this.financesService.getById(id);
+    if (!fin) throw new BadRequestException(errorMessages.NOT_FOUND);
+    return fin;
+  }
+
   @Get()
   @ApiOkResponse({ type: Array<FinanceDto> })
   async getFinancesByGroupId(
@@ -89,7 +103,7 @@ export class FinancesController {
     const access = await this.checkUser(session.id, ['finance', id]);
     if (!access) throw new BadRequestException(errorMessages.NO_GROUP_ACCESS);
     if (access === RoleEnum.USER)
-      throw new BadRequestException('Вы не имеете доступа');
+      throw new BadRequestException(errorMessages.NO_RULE);
 
     return await this.financesService.delete(id);
   }

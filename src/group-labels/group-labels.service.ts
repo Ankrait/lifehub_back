@@ -7,6 +7,10 @@ import { isNumber } from 'class-validator';
 export class GroupLabelsService {
   constructor(private readonly dbService: DbService) {}
 
+  async getByLabelId(labelId: number) {
+    return await this.dbService.groupLabel.findUnique({ where: { labelId } });
+  }
+
   async create(dto: ActionGroupLabelDto) {
     try {
       return await this.dbService.groupLabel.create({
@@ -24,11 +28,8 @@ export class GroupLabelsService {
 
   // Либо по id, либо по связи
   async delete(dto: ActionGroupLabelDto | number) {
-    const deleted = await this.dbService.groupLabel.deleteMany({
+    await this.dbService.groupLabel.delete({
       where: isNumber(dto) ? { id: dto } : dto,
     });
-
-    if (deleted.count === 0)
-      throw new BadRequestException('Тег или группа не найдены');
   }
 }

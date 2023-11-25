@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateGroupDto, UpdateGroupDto } from './dto';
 import { DbService } from 'src/db/db.service';
 
@@ -11,19 +11,15 @@ export class GroupsService {
   }
 
   async update(id: number, dto: UpdateGroupDto) {
-    try {
-      return await this.dbService.group.update({
-        where: { id },
-        data: dto,
-      });
-    } catch {
-      throw new BadRequestException('Группа не найдена');
-    }
+    return await this.dbService.group.update({
+      where: { id },
+      data: dto,
+    });
   }
 
   async getByUser(userId: number) {
     return await this.dbService.group.findMany({
-      where: { colaborators: { some: { id: userId } } },
+      where: { colaborators: { some: { userId } } },
     });
   }
 
@@ -34,10 +30,6 @@ export class GroupsService {
   }
 
   async delete(id: number) {
-    try {
-      return await this.dbService.group.delete({ where: { id } });
-    } catch {
-      throw new BadRequestException('Группа не найдена');
-    }
+    await this.dbService.group.delete({ where: { id } });
   }
 }

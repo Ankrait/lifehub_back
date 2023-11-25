@@ -38,7 +38,7 @@ model Group {
   notes        Note[]
   plans        Plan[]
   finances     Finance[]
-  groupLabels   GroupLabel[]
+  groupLabels  GroupLabel[]
 }
 
 model Collaborator {

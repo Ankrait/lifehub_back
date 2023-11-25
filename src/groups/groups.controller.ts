@@ -18,6 +18,7 @@ import { CreateGroupDto, GroupDto, UpdateGroupDto } from './dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { CollaboratorsService } from '../collaborators/collaborators.service';
 import { RoleEnum } from '@prisma/client';
+import { errorMessages } from 'src/common/errorMessages';
 
 @ApiTags('Groups')
 @Controller('groups')
@@ -28,24 +29,18 @@ export class GroupsController {
     private readonly collaboratorsService: CollaboratorsService,
   ) {}
 
+  private async checkUser(userId: number, groupId: number) {
+    const user = await this.collaboratorsService.get({ groupId, userId });
+    if (!user) return false;
+    return user.role;
+  }
+
   @Get()
   @ApiOkResponse({
     type: Array<GroupDto>,
   })
   async getUserGroups(@SessionInfo() session: SessionDto) {
     return await this.groupsService.getByUser(session.id);
-  }
-
-  @Get('/:id')
-  @ApiOkResponse({
-    type: GroupDto,
-  })
-  async getGroup(@Param('id', ParseIntPipe) id: number) {
-    const group = await this.groupsService.getById(id);
-
-    if (!group) throw new BadRequestException('Группа не найдена');
-
-    return group;
   }
 
   @Post()
@@ -67,19 +62,47 @@ export class GroupsController {
     return group;
   }
 
+  @Get('/:id')
+  @ApiOkResponse({
+    type: GroupDto,
+  })
+  async getGroup(
+    @SessionInfo() session: SessionDto,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const access = await this.checkUser(session.id, id);
+    if (!access) throw new BadRequestException(errorMessages.NO_GROUP_ACCESS);
+
+    return await this.groupsService.getById(id);
+  }
+
   @Patch('/:id')
   @ApiOkResponse({
     type: GroupDto,
   })
   async updateGroup(
+    @SessionInfo() session: SessionDto,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateGroupDto,
   ) {
+    const access = await this.checkUser(session.id, id);
+    if (!access) throw new BadRequestException(errorMessages.NO_GROUP_ACCESS);
+    if (access !== RoleEnum.OWNER)
+      throw new BadRequestException(errorMessages.NO_RULE);
+
     return await this.groupsService.update(id, body);
   }
 
   @Delete('/:id')
-  async deleteGroup(@Param('id', ParseIntPipe) id: number) {
+  async deleteGroup(
+    @SessionInfo() session: SessionDto,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    const access = await this.checkUser(session.id, id);
+    if (!access) throw new BadRequestException(errorMessages.NO_GROUP_ACCESS);
+    if (access !== RoleEnum.OWNER)
+      throw new BadRequestException(errorMessages.NO_RULE);
+
     await this.groupsService.delete(id);
   }
 }

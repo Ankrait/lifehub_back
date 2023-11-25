@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DbService } from '../db/db.service';
 import {
   CreateCollaboratorDto,
@@ -27,11 +27,8 @@ export class CollaboratorsService {
 
   // Либо по id, либо по связи
   async delete(dto: DeleteCollaboratorDto | number) {
-    const deleted = await this.dbService.collaborator.deleteMany({
-      where: isNumber(dto) ? { id: dto } : dto,
+    await this.dbService.collaborator.delete({
+      where: isNumber(dto) ? { id: dto } : { userId_groupId: dto },
     });
-
-    if (deleted.count === 0)
-      throw new BadRequestException('Пользователь или группа не найденны');
   }
 }

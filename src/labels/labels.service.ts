@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DbService } from 'src/db/db.service';
 import { CreateLabelDto } from './dto';
 
@@ -17,12 +17,13 @@ export class LabelsService {
   }
 
   async create(dto: CreateLabelDto) {
-    return await this.dbService.label.create({ data: dto });
+    const { groupId, ...restDto } = dto;
+    return await this.dbService.label.create({
+      data: { groupLabel: { create: { groupId } }, ...restDto },
+    });
   }
 
   async delete(id: number) {
-    const deleted = await this.dbService.label.deleteMany({ where: { id } });
-
-    if (deleted.count === 0) throw new BadRequestException('Тег не найден');
+    await this.dbService.label.delete({ where: { id } });
   }
 }

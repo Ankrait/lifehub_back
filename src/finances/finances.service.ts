@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DbService } from 'src/db/db.service';
 import { CreateFinanceDto, UpdateFinanceDto } from './dto';
 
@@ -19,17 +19,10 @@ export class FinancesService {
   }
 
   async update(id: number, dto: UpdateFinanceDto) {
-    try {
-      return await this.dbService.finance.update({ where: { id }, data: dto });
-    } catch {
-      throw new BadRequestException('Финансовая запись не найдена');
-    }
+    return await this.dbService.finance.update({ where: { id }, data: dto });
   }
 
   async delete(id: number) {
-    const deleted = await this.dbService.finance.deleteMany({ where: { id } });
-
-    if (deleted.count === 0)
-      throw new BadRequestException('Финансовая запись не найдена');
+    await this.dbService.finance.delete({ where: { id } });
   }
 }
