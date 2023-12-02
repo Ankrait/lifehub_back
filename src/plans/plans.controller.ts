@@ -47,7 +47,10 @@ export class PlansController {
   }
 
   @Get()
-  @ApiOkResponse({ type: Array<PlanDto> })
+  @ApiOkResponse({
+    type: PlanDto,
+    isArray: true,
+  })
   async getPlansByGroup(
     @SessionInfo() session: SessionDto,
     @Query('groupId', ParseIntPipe) groupId: number,

@@ -37,7 +37,8 @@ export class GroupsController {
 
   @Get()
   @ApiOkResponse({
-    type: Array<GroupDto>,
+    type: GroupDto,
+    isArray: true,
   })
   async getUserGroups(@SessionInfo() session: SessionDto) {
     return await this.groupsService.getByUser(session.id);

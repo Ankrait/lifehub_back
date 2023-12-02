@@ -58,7 +58,10 @@ export class FinancesController {
   }
 
   @Get()
-  @ApiOkResponse({ type: Array<FinanceDto> })
+  @ApiOkResponse({
+    type: FinanceDto,
+    isArray: true,
+  })
   async getFinancesByGroupId(
     @SessionInfo() session: SessionDto,
     @Query('groupId', ParseIntPipe) groupId: number,

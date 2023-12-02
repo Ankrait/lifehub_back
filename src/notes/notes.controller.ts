@@ -60,7 +60,10 @@ export class NotesController {
   }
 
   @Get()
-  @ApiOkResponse({ type: Array<NoteDto> })
+  @ApiOkResponse({
+    type: NoteDto,
+    isArray: true,
+  })
   async getNotesByGroup(
     @SessionInfo() session: SessionDto,
     @Query('groupId', ParseIntPipe) groupId: number,

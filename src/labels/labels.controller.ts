@@ -45,7 +45,10 @@ export class LabelsController {
   }
 
   @Get()
-  @ApiOkResponse({ type: Array<LabelDto> })
+  @ApiOkResponse({
+    type: LabelDto,
+    isArray: true,
+  })
   async getByGroupId(
     @SessionInfo() session: SessionDto,
     @Query('groupId', ParseIntPipe) groupId: number,
