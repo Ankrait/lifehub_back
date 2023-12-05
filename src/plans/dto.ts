@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsDate, IsInt, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsDate,
+  IsInt,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class PlanDto {
   @ApiProperty()
@@ -13,14 +19,16 @@ export class PlanDto {
   dateTo: Date;
 
   @ApiProperty()
+  isFinished: boolean;
+
+  @ApiProperty()
   groupId: number;
 
   @ApiProperty({
-    required: false,
+    nullable: true,
+    type: 'number',
   })
-  @IsInt()
-  @IsOptional()
-  labelId?: number;
+  labelId: number | null;
 }
 
 export class CreatePlanDto {
@@ -37,6 +45,13 @@ export class CreatePlanDto {
   @IsDate()
   @Type(() => Date)
   dateTo?: Date;
+
+  @ApiProperty({
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isFinished?: boolean;
 
   @ApiProperty()
   @IsInt()
@@ -58,6 +73,13 @@ export class UpdatePlanDto {
   @Type(() => Date)
   @IsOptional()
   dateTo?: Date;
+
+  @ApiProperty({
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isFinished?: boolean;
 
   @ApiProperty({
     required: false,

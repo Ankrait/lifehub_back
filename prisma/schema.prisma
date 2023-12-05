@@ -73,9 +73,10 @@ model Note {
 }
 
 model Plan {
-  id      Int       @id @default(autoincrement())
-  message String
-  dateTo  DateTime?
+  id         Int       @id @default(autoincrement())
+  message    String
+  dateTo     DateTime?
+  isFinished Boolean   @default(false)
 
   groupId Int
   group   Group @relation(fields: [groupId], references: [id])

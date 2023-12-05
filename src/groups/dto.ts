@@ -1,6 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
 
+export class GroupPlanStatsDto {
+  @ApiProperty()
+  started: number;
+
+  @ApiProperty()
+  finished: number;
+}
+
+export class GroupStatsDto {
+  @ApiProperty()
+  notesCount: number;
+
+  @ApiProperty()
+  plansCount: GroupPlanStatsDto;
+}
+
 export class GroupDto {
   @ApiProperty()
   id: number;
@@ -9,10 +25,15 @@ export class GroupDto {
   name: string;
 
   @ApiProperty({
-    required: false,
+    nullable: true,
+    type: 'string',
   })
-  @IsOptional()
-  image?: string;
+  image: string | null;
+}
+
+export class FullGroupDto extends GroupDto {
+  @ApiProperty()
+  stats: GroupStatsDto;
 }
 
 export class CreateGroupDto {

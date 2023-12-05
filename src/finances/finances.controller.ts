@@ -84,7 +84,7 @@ export class FinancesController {
     return await this.financesService.create(dto);
   }
 
-  @Patch(':/id')
+  @Patch('/:id')
   @ApiOkResponse({ type: FinanceDto })
   async updateFinance(
     @Param('id', ParseIntPipe) id: number,
@@ -97,7 +97,7 @@ export class FinancesController {
     return await this.financesService.update(id, dto);
   }
 
-  @Delete(':/id')
+  @Delete('/:id')
   @ApiOkResponse()
   async deleteFinance(
     @Param('id', ParseIntPipe) id: number,

@@ -14,11 +14,13 @@ import { GroupsService } from './groups.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { SessionInfo } from 'src/auth/session.decorator';
 import { SessionDto } from 'src/auth/dto';
-import { CreateGroupDto, GroupDto, UpdateGroupDto } from './dto';
+import { CreateGroupDto, FullGroupDto, GroupDto, UpdateGroupDto } from './dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { CollaboratorsService } from '../collaborators/collaborators.service';
 import { RoleEnum } from '@prisma/client';
 import { errorMessages } from 'src/common/errorMessages';
+import { PlansService } from 'src/plans/plans.service';
+import { NotesService } from 'src/notes/notes.service';
 
 @ApiTags('Groups')
 @Controller('groups')
@@ -27,6 +29,8 @@ export class GroupsController {
   constructor(
     private readonly groupsService: GroupsService,
     private readonly collaboratorsService: CollaboratorsService,
+    private readonly plansService: PlansService,
+    private readonly notesService: NotesService,
   ) {}
 
   private async checkUser(userId: number, groupId: number) {
@@ -40,7 +44,7 @@ export class GroupsController {
     type: GroupDto,
     isArray: true,
   })
-  async getUserGroups(@SessionInfo() session: SessionDto) {
+  async getUserGroups(@SessionInfo() session: SessionDto): Promise<GroupDto[]> {
     return await this.groupsService.getByUser(session.id);
   }
 
@@ -51,7 +55,7 @@ export class GroupsController {
   async createGroup(
     @SessionInfo() session: SessionDto,
     @Body() body: CreateGroupDto,
-  ) {
+  ): Promise<GroupDto> {
     const group = await this.groupsService.create(body);
 
     this.collaboratorsService.create_update({
@@ -65,16 +69,33 @@ export class GroupsController {
 
   @Get('/:id')
   @ApiOkResponse({
-    type: GroupDto,
+    type: FullGroupDto,
   })
   async getGroup(
     @SessionInfo() session: SessionDto,
     @Param('id', ParseIntPipe) id: number,
-  ) {
+  ): Promise<FullGroupDto> {
     const access = await this.checkUser(session.id, id);
     if (!access) throw new BadRequestException(errorMessages.NO_GROUP_ACCESS);
 
-    return await this.groupsService.getById(id);
+    const group = await this.groupsService.getById(id);
+    if (!group) {
+      throw new BadRequestException('Группа не найдена');
+    }
+
+    const notes = await this.notesService.getByGroupId(id);
+    const plans = await this.plansService.getByGroup(id);
+
+    return {
+      ...group,
+      stats: {
+        notesCount: notes.length,
+        plansCount: {
+          finished: plans.filter(el => el.isFinished).length,
+          started: plans.filter(el => !el.isFinished).length,
+        },
+      },
+    };
   }
 
   @Patch('/:id')
@@ -85,7 +106,7 @@ export class GroupsController {
     @SessionInfo() session: SessionDto,
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateGroupDto,
-  ) {
+  ): Promise<GroupDto> {
     const access = await this.checkUser(session.id, id);
     if (!access) throw new BadRequestException(errorMessages.NO_GROUP_ACCESS);
     if (access !== RoleEnum.OWNER)
@@ -95,10 +116,11 @@ export class GroupsController {
   }
 
   @Delete('/:id')
+  @ApiOkResponse()
   async deleteGroup(
     @SessionInfo() session: SessionDto,
     @Param('id', ParseIntPipe) id: number,
-  ) {
+  ): Promise<void> {
     const access = await this.checkUser(session.id, id);
     if (!access) throw new BadRequestException(errorMessages.NO_GROUP_ACCESS);
     if (access !== RoleEnum.OWNER)

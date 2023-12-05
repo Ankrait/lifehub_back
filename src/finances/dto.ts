@@ -24,8 +24,11 @@ export class FinanceDto {
   @ApiProperty()
   groupId: number;
 
-  @ApiProperty()
-  labelId: number;
+  @ApiProperty({
+    nullable: true,
+    type: 'number',
+  })
+  labelId: number | null;
 }
 
 export class CreateFinanceDto {

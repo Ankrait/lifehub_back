@@ -71,7 +71,10 @@ export class NotesController {
     const access = await this.checkUser(session.id, ['group', groupId]);
     if (!access) throw new BadRequestException(errorMessages.NO_GROUP_ACCESS);
 
-    return await this.notesService.getByGroupId(groupId);
+    return (await this.notesService.getByGroupId(groupId)).sort((a, b) => {
+      if (a.isImportant && !b.isImportant) return -1;
+      return 0;
+    });
   }
 
   @Post()
