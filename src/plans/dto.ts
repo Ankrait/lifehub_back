@@ -7,6 +7,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import { LabelDto } from 'src/labels/dto';
 
 export class PlanDto {
   @ApiProperty()
@@ -15,8 +16,11 @@ export class PlanDto {
   @ApiProperty()
   message: string;
 
-  @ApiProperty()
-  dateTo: Date;
+  @ApiProperty({
+    nullable: true,
+    type: 'string',
+  })
+  dateTo: Date | null;
 
   @ApiProperty()
   isFinished: boolean;
@@ -28,7 +32,7 @@ export class PlanDto {
     nullable: true,
     type: 'number',
   })
-  labelId: number | null;
+  labelId: LabelDto | null;
 }
 
 export class CreatePlanDto {

@@ -58,7 +58,9 @@ export class PlansController {
     const access = await this.checkUser(session.id, ['group', groupId]);
     if (!access) throw new BadRequestException(errorMessages.NO_GROUP_ACCESS);
 
-    return this.plansService.getByGroup(groupId);
+    return (await this.plansService.getByGroup(groupId)).sort(
+      (a, b) => a.id - b.id,
+    );
   }
 
   @Post()

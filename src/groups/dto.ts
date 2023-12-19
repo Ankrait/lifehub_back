@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, MaxLength, MinLength } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+import { LabelDto } from 'src/labels/dto';
 
 export class GroupPlanStatsDto {
   @ApiProperty()
@@ -34,6 +41,13 @@ export class GroupDto {
 export class FullGroupDto extends GroupDto {
   @ApiProperty()
   stats: GroupStatsDto;
+
+  @ApiProperty({
+    isArray: true,
+    type: LabelDto,
+  })
+  @IsArray()
+  labels: LabelDto[];
 }
 
 export class CreateGroupDto {

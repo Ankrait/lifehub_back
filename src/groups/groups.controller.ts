@@ -21,6 +21,7 @@ import { RoleEnum } from '@prisma/client';
 import { errorMessages } from 'src/common/errorMessages';
 import { PlansService } from 'src/plans/plans.service';
 import { NotesService } from 'src/notes/notes.service';
+import { LabelsService } from 'src/labels/labels.service';
 
 @ApiTags('Groups')
 @Controller('groups')
@@ -31,6 +32,7 @@ export class GroupsController {
     private readonly collaboratorsService: CollaboratorsService,
     private readonly plansService: PlansService,
     private readonly notesService: NotesService,
+    private readonly labelsService: LabelsService,
   ) {}
 
   private async checkUser(userId: number, groupId: number) {
@@ -85,6 +87,7 @@ export class GroupsController {
 
     const notes = await this.notesService.getByGroupId(id);
     const plans = await this.plansService.getByGroup(id);
+    const labels = await this.labelsService.getByGroup(id);
 
     return {
       ...group,
@@ -95,6 +98,7 @@ export class GroupsController {
           started: plans.filter(el => !el.isFinished).length,
         },
       },
+      labels,
     };
   }
 

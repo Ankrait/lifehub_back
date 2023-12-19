@@ -11,9 +11,17 @@ import { isNumber } from 'class-validator';
 export class CollaboratorsService {
   constructor(private readonly dbService: DbService) {}
 
+  async getByGroup(groupId: number) {
+    return await this.dbService.collaborator.findMany({
+      where: { groupId },
+      include: { user: true },
+    });
+  }
+
   async get(dto: GetCollaboratorDto) {
     return await this.dbService.collaborator.findUnique({
       where: { userId_groupId: dto },
+      include: { user: true },
     });
   }
 
@@ -22,6 +30,7 @@ export class CollaboratorsService {
       create: dto,
       where: { userId_groupId: { groupId: dto.groupId, userId: dto.userId } },
       update: { role: dto.role },
+      include: { user: true },
     });
   }
 

@@ -4,6 +4,9 @@ import { IsEnum, IsInt, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class LabelDto {
   @ApiProperty()
+  id: number;
+
+  @ApiProperty()
   text: string;
 
   @ApiProperty({

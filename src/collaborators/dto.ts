@@ -16,6 +16,9 @@ export class CollaboratorDto {
 
   @ApiProperty()
   role: RoleEnum;
+
+  @ApiProperty()
+  userName: string;
 }
 
 export class GetCollaboratorDto {
