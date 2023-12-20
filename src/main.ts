@@ -19,11 +19,19 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
     credentials: true,
-    origin: [
-      'http://localhost:3000',
-      'https://df20-188-225-50-141.ngrok-free.app',
+    origin: ['https://b8c0-188-225-50-141.ngrok-free.app'],
+    methods: 'PUT, POST, PATCH, DELETE, GET',
+    allowedHeaders: [
+      'Access-Control-Allow-Headers',
+      'Access-Control-Allow-Origin',
+      'Origin',
+      'X-Requested-With',
+      'Content-Type',
+      'Accept',
+      'ngrok-skip-browser-warning',
+      'user-agent',
     ],
-    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept'],
+    preflightContinue: false,
   });
 
   await app.listen(3011);
