@@ -32,7 +32,13 @@ export class PlanDto {
     nullable: true,
     type: 'number',
   })
-  labelId: LabelDto | null;
+  labelId: number | null;
+
+  @ApiProperty({
+    nullable: true,
+    type: 'LabelDto',
+  })
+  label: LabelDto | null;
 }
 
 export class CreatePlanDto {
